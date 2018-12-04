@@ -75,7 +75,7 @@ def main():
 
     results = np.array(results)
     np.savetxt(osp.join('log',name+'.csv'),results, delimiter=',')
-    torch.save(model, osp.join('models',name+'.csv'))
+    torch.save(model, osp.join('models',name))
 
 
 
