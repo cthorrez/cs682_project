@@ -1,3 +1,4 @@
+import sys
 import os.path as osp
 import numpy as np
 import torch
@@ -12,9 +13,18 @@ from models import TwoHeadedNet, IoU, accuracy
 
 
 def main():
+
+    if torch.cuda.is_available():
+        device = torch.cuda.current_device()
+    else:
+        device = 'cpu'
+
+
     torch.manual_seed(2)
 
     model = TwoHeadedNet()
+    model = model.to(device)
+
     #optimizer = optim.RMSprop(model.parameters())
     optimizer = optim.Adam(model.parameters(), weight_decay=1e-3)
     cross_ent_loss_fn = nn.CrossEntropyLoss()
@@ -35,6 +45,8 @@ def main():
 
         for i,batch in enumerate(train_loader):
             images, labels, bbs = batch
+
+            images, labels, bbs = images.to(device), labels.to(device), bbs.to(device)
             
             optimizer.zero_grad()
             scores, bb_preds = model(images)
@@ -59,7 +71,7 @@ def main():
         results.append([epoch, acc, iou, mse, ce])
 
 
-    name = 'model_iou_wd0.001'
+    name = 'blank'
 
     results = np.array(results)
     np.savetxt(osp.join('log',name+'.csv'),results, delimiter=',')

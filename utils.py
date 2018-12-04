@@ -14,11 +14,17 @@ import cv2
 
 
 def validate(data_loader, model):
+    if torch.cuda.is_available():
+        device = torch.cuda.current_device()
+    else:
+        device = 'cpu'
     mse, ce, iou, acc = [], [], [], []
     iou_fn = IoU()
 
     for batch in data_loader:
         imgs, labels, bbs = batch
+        imgs, labels, bbs = imgs.to(device), labels.to(device), bbs.to(device)
+
         scores, bb_preds = model(imgs)
     
         tmp_acc = float(accuracy(scores,labels))
