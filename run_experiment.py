@@ -109,9 +109,9 @@ def main(batch_size = 100, weight_decay=1e-4, num_epochs=1, name='default', loss
                 loss_net_loss.backward(retain_graph=True)
                 loss_optimizer.step()
                 print('pred iou mean:', float(torch.mean(pred_iou)))
-                loss = cross_ent_loss +  10*mse_loss_fn(pred_iou, torch.zeros(pred_iou.shape).to(device)+1)
+                #loss = cross_ent_loss +  mse_loss_fn(pred_iou, torch.zeros(pred_iou.shape).to(device)+1)
                 #loss = mse_loss_fn(pred_iou, torch.zeros(pred_iou.shape).to(device)+1)
-                #loss = -torch.mean(pred_iou)
+                #loss = cross_ent_loss -torch.mean(pred_iou)
 
             loss.backward()
             optimizer.step()

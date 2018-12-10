@@ -28,7 +28,7 @@ class IoU(nn.Module):
     def __init__(self):
         super(IoU, self).__init__()
 
-    def forward(self, pred, gt, eps=1e-6):
+    def forward(self, gt, pred, eps=1e-6):
         bs = pred.shape[0]
 
         gt1 = gt.view(bs,2,-1)
