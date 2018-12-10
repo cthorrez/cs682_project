@@ -120,12 +120,12 @@ def main(batch_size = 100, weight_decay=1e-4, num_epochs=1, name='default', loss
         epoch_results = train_results[epoch*batches_per_epoch:(epoch+1)*batches_per_epoch]
         epoch_results = np.mean(epoch_results, axis=0)
         acc, pk, iou, mse, ce = epoch_results
-        print('train:', 'acc:', acc, 'p5:', pk, 'iou:', iou, 'mse:', mse, 'ce:', ce)
+        print('train:', 'acc:', round(acc,3), 'p5:', round(pk,3), 'iou:', round(iou,3), 'mse:', round(mse,3), 'ce:', round(ce,3))
 
 
 
         acc, iou, mse, ce, pk = validate(val_loader, model)
-        print('val:', 'acc:', acc, 'p5:', pk, 'iou:', iou, 'mse:', mse, 'ce:', ce)
+        print('val:', 'acc:', round(acc,3), 'p5:', round(pk,3), 'iou:', round(iou,3), 'mse:', round(mse,3), 'ce:', round(ce,3))
         val_results.append([acc, pk, iou, mse, ce])
 
         torch.save(model.cpu(), osp.join('log', name, 'models','model_'+str(epoch)))
