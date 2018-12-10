@@ -68,7 +68,7 @@ def main(batch_size = 100, weight_decay=1e-4, num_epochs=1, name='default', loss
             optimizer.zero_grad()
             scores, bb_preds = model(images)
 
-            # print(torch.mean(bb_preds, dim=0).data)
+            print(torch.mean(bb_preds, dim=0).data)
 
             cross_ent_loss = cross_ent_loss_fn(scores, labels)
             mse_loss = mse_loss_fn(bb_preds, bbs)
