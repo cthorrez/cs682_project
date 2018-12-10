@@ -43,7 +43,8 @@ class IoU(nn.Module):
         area_gt = area(gt[:,:2], gt[:,2:])
         union = area_pred + area_gt - inter
 
-        iou = (torch.sum(inter)+eps)/(torch.sum(union)+eps)
+        # should be Bx1
+        iou = (inter+eps)/(union+eps)
         return iou    
 
 
