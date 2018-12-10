@@ -55,6 +55,8 @@ def main(batch_size = 100, weight_decay=1e-4, num_epochs=1, name='default', loss
     train_results = []
 
     for epoch in range(num_epochs):
+        model = model.to(device)
+        loss_net = loss_net.to(device)
         print('epoch:', epoch)
         epoch_results = []
 
