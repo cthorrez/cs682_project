@@ -2,6 +2,6 @@
     "name" : "ce_mse_1e-2",
     "loss_idx" : 4,
     "num_epochs" : 15,
-    "batch_size" : 1000,
+    "batch_size" : 750,
     "weight_decay" : 1e-2
 }
