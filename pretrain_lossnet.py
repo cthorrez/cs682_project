@@ -40,8 +40,8 @@ def main():
             images, labels, bbs = batch
             images, labels, bbs = images.to(device), labels.to(device), bbs.to(device)
 
-            preds = torch.tensor([10.0,10.0,50.0,50.0])
-            noise = torch.randn_like(bbs) * 25
+            preds = torch.tensor([10.0,10.0,50.0,50.0]).to(device)
+            noise = torch.randn_like(bbs).to(device) * 25
             preds = (preds + noise).to(device)
 
             iou = iou_fn(bbs, preds)
