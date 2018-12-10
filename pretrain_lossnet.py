@@ -41,14 +41,16 @@ def main():
             images, labels, bbs = images.to(device), labels.to(device), bbs.to(device)
 
             preds = torch.tensor([10.0,10.0,50.0,50.0]).to(device)
-            noise = torch.randn_like(bbs).to(device) * 25
+            noise = torch.randn_like(bbs).to(device) * 5
             preds = (preds + noise).to(device)
 
             iou = iou_fn(bbs, preds)
             pred_iou = loss_net(bbs, preds)
 
             loss = mse_loss_fn(iou, torch.squeeze(pred_iou))
-            print('mse:', float(loss))
+            print('iou:', torch.mean(iou))
+            print('pred_iou:', torch.mean(pred_iou))
+            print('mse:', loss)
 
             loss.backward()
             optimizer.step()
