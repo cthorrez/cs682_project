@@ -48,9 +48,9 @@ def main():
             pred_iou = loss_net(bbs, preds)
 
             loss = mse_loss_fn(iou, torch.squeeze(pred_iou))
-            print('iou:', torch.mean(iou))
-            print('pred_iou:', torch.mean(pred_iou))
-            print('mse:', loss)
+            print('iou:', float(torch.mean(iou)))
+            print('pred_iou:', float(torch.mean(pred_iou)))
+            print('mse:', float(loss))
 
             loss.backward()
             optimizer.step()
