@@ -134,8 +134,8 @@ def main(batch_size = 100, weight_decay=1e-4, num_epochs=1, name='default', loss
     train_results = np.array(train_results)
     val_loader = np.array(val_results)
 
-    np.savetxt(osp.join('log',name+_train+'.csv'),train_results, delimiter=',')
-    np.savetxt(osp.join('log',name+_val+'.csv'),val_results, delimiter=',')
+    np.savetxt(osp.join('log',name+'_train.csv'),train_results, delimiter=',')
+    np.savetxt(osp.join('log',name+'_val.csv'),val_results, delimiter=',')
 
 
 if __name__ == '__main__':
