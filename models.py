@@ -45,7 +45,8 @@ class IoU(nn.Module):
 
         # should be Bx1
         iou = (inter+eps)/(union+eps)
-        return iou    
+        iou = torch.squeeze(iou)
+        return iou
 
 
 
