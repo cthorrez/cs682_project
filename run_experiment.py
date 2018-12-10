@@ -35,7 +35,11 @@ def main(batch_size = 100, weight_decay=1e-4, num_epochs=1, name='default', loss
     model = model.to(device)
 
     #loss_net = LossNet()
-    loss_net = torch.load('pretrained_loss_net')
+
+    if device == 'cpu':
+        loss_net = torch.load('pretrained_loss_net', map_location='cpu')
+    else:
+        loss_net = torch.load('pretrained_loss_net')
     loss_net = loss_net.to(device)
 
     #optimizer = optim.RMSprop(model.parameters())
@@ -74,6 +78,7 @@ def main(batch_size = 100, weight_decay=1e-4, num_epochs=1, name='default', loss
             #print(torch.mean(bb_preds, dim=0).data)
 
             cross_ent_loss = cross_ent_loss_fn(scores, labels)
+            # print(bb_preds.shape, bbs.shape)
             mse_loss = mse_loss_fn(bb_preds, bbs)
             iou = iou_fn(bb_preds, bbs)
             acc = accuracy(scores, labels)
@@ -106,8 +111,8 @@ def main(batch_size = 100, weight_decay=1e-4, num_epochs=1, name='default', loss
                 loss_net_loss = mse_loss_fn(iou, torch.squeeze(pred_iou))
                 
                 # maybe put these back in later?           
-                # loss_net_loss.backward(retain_graph=True)
-                # loss_optimizer.step()
+                loss_net_loss.backward(retain_graph=True)
+                loss_optimizer.step()
                 
                 #print('pred iou mean:', float(torch.mean(pred_iou)))
                 #loss = cross_ent_loss +  mse_loss_fn(pred_iou, torch.zeros(pred_iou.shape).to(device)+1)
@@ -118,10 +123,12 @@ def main(batch_size = 100, weight_decay=1e-4, num_epochs=1, name='default', loss
             loss.backward()
             optimizer.step()
 
-        epoch_results = train_results[epoch*batches_per_epoch:(epoch+1)*batches_per_epoch]
-        epoch_results = np.mean(epoch_results, axis=0)
-        acc, pk, iou, mse, ce = epoch_results
-        print('train:', 'acc:', round(acc,3), 'p5:', round(pk,3), 'iou:', round(iou,3), 'mse:', round(mse,3), 'ce:', round(ce,3))
+            break
+
+        # epoch_results = train_results[epoch*batches_per_epoch:(epoch+1)*batches_per_epoch]
+        # epoch_results = np.mean(epoch_results, axis=0)
+        # acc, pk, iou, mse, ce = epoch_results
+        # print('train:', 'acc:', round(acc,3), 'p5:', round(pk,3), 'iou:', round(iou,3), 'mse:', round(mse,3), 'ce:', round(ce,3))
 
 
 

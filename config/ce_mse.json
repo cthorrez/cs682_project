@@ -1,7 +1,7 @@
 {
     "name" : "ce_mse",
     "loss_idx" : 4,
-    "num_epochs" : 3,
-    "batch_size" : 250,
-    "weight_decay" : 0
+    "num_epochs" : 10,
+    "batch_size" : 500,
+    "weight_decay" : 1e-3
 }

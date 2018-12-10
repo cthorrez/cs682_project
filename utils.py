@@ -35,6 +35,9 @@ def show_img_bbs(img, pred, actual):
 
 
 
+def my_mse(gt, preds):
+    return torch.mean(torch.pow(gt-preds,2))
+
 def validate(data_loader, model):
     if torch.cuda.is_available():
         device = torch.cuda.current_device()
@@ -42,7 +45,8 @@ def validate(data_loader, model):
         device = 'cpu'
     mse, ce, iou, acc, pk = [], [], [], [], []
     iou_fn = IoU()
-    mse_loss_fn = torch.nn.MSELoss()
+    # mse_loss_fn = torch.nn.MSELoss(reduction='elementwise_mean')
+    mse_loss_fn = my_mse
 
     for batch in data_loader:
         imgs, labels, bbs = batch
@@ -51,6 +55,9 @@ def validate(data_loader, model):
         scores, bb_preds = model(imgs)
     
         tmp_acc = float(accuracy(scores,labels))
+        # print(bbs)
+        # print(bb_preds)
+
         tmp_iou= float(torch.mean(iou_fn(bbs, bb_preds)))
         tmp_mse = float(mse_loss_fn(bbs,bb_preds))
         tmp_ce = float(F.cross_entropy(scores,labels))
