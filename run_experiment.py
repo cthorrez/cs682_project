@@ -123,8 +123,6 @@ def main(batch_size = 100, weight_decay=1e-4, num_epochs=1, name='default', loss
             loss.backward()
             optimizer.step()
 
-            break
-
         # epoch_results = train_results[epoch*batches_per_epoch:(epoch+1)*batches_per_epoch]
         # epoch_results = np.mean(epoch_results, axis=0)
         # acc, pk, iou, mse, ce = epoch_results
