@@ -1,5 +1,5 @@
 {
-    "name" : "ce_mse",
+    "name" : "ce_iou",
     "loss_idx" : 3,
     "num_epochs" : 10,
     "batch_size" : 1000,

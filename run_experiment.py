@@ -12,7 +12,7 @@ from utils import TrainDataset,ValTestDataset, validate
 from models import TwoHeadedNet, LossNet, IoU, accuracy, precision_at_k
 
 
-def main(batch_size = 100, weight_decay=1e-4, num_epochs=1, name='default'):
+def main(batch_size = 100, weight_decay=1e-4, num_epochs=1, name='default', loss_idx=0):
     if os.path.exists('log/'+name):
         shutil.rmtree('log/'+name)
     os.makedirs(osp.join('log',name,'models'))
@@ -45,16 +45,17 @@ def main(batch_size = 100, weight_decay=1e-4, num_epochs=1, name='default'):
     iou_fn = IoU()
 
     val = ValTestDataset(mode='val')
-    val_loader = DataLoader(val, batch_size=batch_size, shuffle=False)
+    val_loader = DataLoader(val, batch_size=batch_size, shuffle=False, num_workers=5)
 
     train = TrainDataset()
-    train_loader = DataLoader(train, batch_size=batch_size, shuffle=True)
+    train_loader = DataLoader(train, batch_size=batch_size, shuffle=True, num_workers=5)
 
 
     val_results = []
     train_results = []
 
     for epoch in range(num_epochs):
+        print('epoch:', epoch)
         epoch_results = []
 
         for i,batch in enumerate(train_loader):
@@ -65,7 +66,7 @@ def main(batch_size = 100, weight_decay=1e-4, num_epochs=1, name='default'):
             optimizer.zero_grad()
             scores, bb_preds = model(images)
 
-            print(torch.mean(bb_preds, dim=0).data)
+            # print(torch.mean(bb_preds, dim=0).data)
 
             cross_ent_loss = cross_ent_loss_fn(scores, labels)
             mse_loss = mse_loss_fn(bb_preds, bbs)
@@ -83,20 +84,34 @@ def main(batch_size = 100, weight_decay=1e-4, num_epochs=1, name='default'):
             # print('precision at 5:', pk)
 
 
-            # loss = cross_ent_loss
-            # loss = -iou
-            # loss = mse_loss
-            # loss = cross_ent_loss - iou
-            loss = cross_ent_loss + mse_loss/200
+            loss1 = cross_ent_loss
+            loss2 = -iou
+            loss3 = mse_loss
+            loss4 = cross_ent_loss - iou
+            loss5 = cross_ent_loss + mse_loss/200
+
+            losses = [loss1, loss2, loss3, loss4, loss5]
+
+            loss = losses[loss_idx]
+
+
+            # if using the learned loss
+            if loss_idx == 5:
+                pred_iou = loss_net(bbs, bb_preds)
+                loss_net_loss = mse_loss_fn(iou, pred_iou)
+                print('loss net loss:', float(loss_net_loss))
+                loss_net_loss.backward()
+                loss_optimizer.step()
+
+                loss = -pred_iou
+
+
 
             loss.backward()
             optimizer.step()
 
-            # pred_iou = loss_net(bbs, bb_preds)
-            # loss_net_loss = mse_loss_fn(iou, pred_iou)
-            # print('loss net loss:', float(loss_net_loss))
-            # loss_net_loss.backward()
-            # loss_optimizer.step()
+
+            
 
 
 
