@@ -47,7 +47,7 @@ def main():
             iou = iou_fn(bbs, preds)
             pred_iou = loss_net(bbs, preds)
 
-            loss = mse_loss_fn(iou, pred_iou)
+            loss = mse_loss_fn(iou, torch.squeeze(pred_iou))
             print('mse:', float(loss))
 
             loss.backward()
