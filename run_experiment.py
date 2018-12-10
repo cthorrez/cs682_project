@@ -111,8 +111,8 @@ def main(batch_size = 100, weight_decay=1e-4, num_epochs=1, name='default', loss
                 loss_net_loss = mse_loss_fn(iou, torch.squeeze(pred_iou))
                 
                 # maybe put these back in later?           
-                loss_net_loss.backward(retain_graph=True)
-                loss_optimizer.step()
+                # loss_net_loss.backward(retain_graph=True)
+                # loss_optimizer.step()
                 
                 #print('pred iou mean:', float(torch.mean(pred_iou)))
                 #loss = cross_ent_loss +  mse_loss_fn(pred_iou, torch.zeros(pred_iou.shape).to(device)+1)
@@ -123,10 +123,10 @@ def main(batch_size = 100, weight_decay=1e-4, num_epochs=1, name='default', loss
             loss.backward()
             optimizer.step()
 
-        # epoch_results = train_results[epoch*batches_per_epoch:(epoch+1)*batches_per_epoch]
-        # epoch_results = np.mean(epoch_results, axis=0)
-        # acc, pk, iou, mse, ce = epoch_results
-        # print('train:', 'acc:', round(acc,3), 'p5:', round(pk,3), 'iou:', round(iou,3), 'mse:', round(mse,3), 'ce:', round(ce,3))
+        epoch_results = train_results[epoch*batches_per_epoch:(epoch+1)*batches_per_epoch]
+        epoch_results = np.mean(epoch_results, axis=0)
+        acc, pk, iou, mse, ce = epoch_results
+        print('train:', 'acc:', round(acc,3), 'p5:', round(pk,3), 'iou:', round(iou,3), 'mse:', round(mse,3), 'ce:', round(ce,3))
 
 
 
