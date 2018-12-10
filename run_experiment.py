@@ -71,7 +71,7 @@ def main(batch_size = 100, weight_decay=1e-4, num_epochs=1, name='default', loss
 
             scores, bb_preds = model(images)
 
-            print(torch.mean(bb_preds, dim=0).data)
+            #print(torch.mean(bb_preds, dim=0).data)
 
             cross_ent_loss = cross_ent_loss_fn(scores, labels)
             mse_loss = mse_loss_fn(bb_preds, bbs)
@@ -109,7 +109,7 @@ def main(batch_size = 100, weight_decay=1e-4, num_epochs=1, name='default', loss
                 # loss_net_loss.backward(retain_graph=True)
                 # loss_optimizer.step()
                 
-                print('pred iou mean:', float(torch.mean(pred_iou)))
+                #print('pred iou mean:', float(torch.mean(pred_iou)))
                 #loss = cross_ent_loss +  mse_loss_fn(pred_iou, torch.zeros(pred_iou.shape).to(device)+1)
                 #loss = mse_loss_fn(pred_iou, torch.zeros(pred_iou.shape).to(device)+1)
                 loss = cross_ent_loss - torch.mean(pred_iou)
