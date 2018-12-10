@@ -53,7 +53,7 @@ def main():
             loss.backward()
             optimizer.step()
 
-    torch.save(model, 'pretrained_loss_net')
+    torch.save(loss_net, 'pretrained_loss_net')
 
 
 if __name__ == '__main__':

@@ -34,7 +34,8 @@ def main(batch_size = 100, weight_decay=1e-4, num_epochs=1, name='default', loss
     model = TwoHeadedNet()
     model = model.to(device)
 
-    loss_net = LossNet()
+    #loss_net = LossNet()
+    loss_net = torch.load('pretrained_loss_net')
     loss_net = loss_net.to(device)
 
     #optimizer = optim.RMSprop(model.parameters())
@@ -102,12 +103,12 @@ def main(batch_size = 100, weight_decay=1e-4, num_epochs=1, name='default', loss
             # if using the learned loss
             if loss_idx == 5:
                 pred_iou = loss_net(bbs, bb_preds)
-                # print('iou:', iou)
-                # print('pred_iou:', pred_iou)
                 loss_net_loss = mse_loss_fn(iou, torch.squeeze(pred_iou))
-                # print('loss net loss:', float(loss_net_loss))
-                loss_net_loss.backward(retain_graph=True)
-                loss_optimizer.step()
+                
+                # maybe put these back in later?           
+                # loss_net_loss.backward(retain_graph=True)
+                # loss_optimizer.step()
+                
                 print('pred iou mean:', float(torch.mean(pred_iou)))
                 #loss = cross_ent_loss +  mse_loss_fn(pred_iou, torch.zeros(pred_iou.shape).to(device)+1)
                 #loss = mse_loss_fn(pred_iou, torch.zeros(pred_iou.shape).to(device)+1)
