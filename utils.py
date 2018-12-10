@@ -51,7 +51,7 @@ def validate(data_loader, model):
         scores, bb_preds = model(imgs)
     
         tmp_acc = float(accuracy(scores,labels))
-        tmp_iou= float(iou_fn(bbs, bb_preds))
+        tmp_iou= float(torch.mean(iou_fn(bbs, bb_preds)))
         tmp_mse = float(mse_loss_fn(bbs,bb_preds))
         tmp_ce = float(F.cross_entropy(scores,labels))
         tmp_pk = float(precision_at_k(scores, labels))

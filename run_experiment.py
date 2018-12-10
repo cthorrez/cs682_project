@@ -77,7 +77,7 @@ def main(batch_size = 100, weight_decay=1e-4, num_epochs=1, name='default', loss
             pk = precision_at_k(scores, labels)
 
 
-            train_results.append([acc, pk, float(iou), float(mse_loss), float(cross_ent_loss)])
+            train_results.append([acc, pk, float(torch.mean(iou)), float(mse_loss), float(cross_ent_loss)])
 
             # print('cross ent loss:', float(cross_ent_loss))
             # print('mse loss:', float(mse_loss))
