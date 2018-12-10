@@ -29,7 +29,7 @@ def main():
     train = TrainDataset
     train_loader = DataLoader(train, batch_size=250, shuffle=True, num_workers=10)
 
-    num_epochs = 3:
+    num_epochs = 3
     for epoch in range(num_epochs):
         print('epoch:', epoch)
 
