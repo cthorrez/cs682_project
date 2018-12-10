@@ -85,16 +85,16 @@ def main(batch_size = 100, weight_decay=1e-4, num_epochs=1, name='default', loss
             # print('accuracy:', acc)
             # print('precision at 5:', pk)
 
+            if loss_idx < 5:
+                loss1 = cross_ent_loss
+                loss2 = -iou
+                loss3 = mse_loss
+                loss4 = cross_ent_loss - iou
+                loss5 = cross_ent_loss + mse_loss/200
 
-            loss1 = cross_ent_loss
-            loss2 = -iou
-            loss3 = mse_loss
-            loss4 = cross_ent_loss - iou
-            loss5 = cross_ent_loss + mse_loss/200
+                losses = [loss1, loss2, loss3, loss4, loss5]
 
-            losses = [loss1, loss2, loss3, loss4, loss5]
-
-            loss = losses[loss_idx]
+                loss = losses[loss_idx]
 
 
             # if using the learned loss
