@@ -42,7 +42,7 @@ def validate(data_loader, model):
         device = 'cpu'
     mse, ce, iou, acc, pk = [], [], [], [], []
     iou_fn = IoU()
-    mse_loss_fn = nn.MSELoss()
+    mse_loss_fn = torch.nn.MSELoss()
 
     for batch in data_loader:
         imgs, labels, bbs = batch

@@ -105,7 +105,7 @@ def main(batch_size = 100, weight_decay=1e-4, num_epochs=1, name='default', loss
                 loss_net_loss.backward()
                 loss_optimizer.step()
 
-                loss = -pred_iou
+                loss = -torch.sum(pred_iou)
 
 
 
