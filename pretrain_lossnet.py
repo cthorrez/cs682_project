@@ -24,18 +24,18 @@ def main():
 
     iou_fn = IoU()
     mse_loss_fn = nn.MSELoss()
-    optimizer = optim.Adam(model.parameters(), weight_decay=1e-3)
+    optimizer = optim.Adam(loss_net.parameters(), weight_decay=1e-3)
 
-    train = TrainDataset
+    train = TrainDataset()
     train_loader = DataLoader(train, batch_size=250, shuffle=True, num_workers=10)
 
     num_epochs = 3
     for epoch in range(num_epochs):
         print('epoch:', epoch)
 
-        for batch in train_loader:
+        for i,batch in enumerate(train_loader):
 
-            optimizer
+            optimizer.zero_grad()
 
             images, labels, bbs = batch
             images, labels, bbs = images.to(device), labels.to(device), bbs.to(device)
@@ -44,7 +44,7 @@ def main():
             noise = torch.randn_like(bbs) * 25
             preds = (preds + noise).to(device)
 
-            iou = IoU(bbs, preds)
+            iou = iou_fn(bbs, preds)
             pred_iou = loss_net(bbs, preds)
 
             loss = mse_loss_fn(iou, pred_iou)
