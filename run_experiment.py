@@ -59,6 +59,11 @@ def main(batch_size = 100, weight_decay=1e-4, num_epochs=1, name='default', loss
     val_results = []
     train_results = []
 
+    # do one round of validation at the beginning to see the baseline
+    acc, iou, mse, ce, pk = validate(val_loader, model)
+    print('val:  ', 'acc:', round(acc,3), 'p5:', round(pk,3), 'iou:', round(iou,3), 'mse:', round(mse,3), 'ce:', round(ce,3))
+    val_results.append([acc, pk, iou, mse, ce])
+
     for epoch in range(num_epochs):
         model = model.to(device)
         loss_net = loss_net.to(device)
