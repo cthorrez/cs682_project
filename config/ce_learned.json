@@ -1,7 +1,7 @@
 {
-    "name" : "ce_learned",
+    "name" : "ce_learned_1e-2",
     "loss_idx" : 5,
     "num_epochs" : 10,
     "batch_size" : 500,
-    "weight_decay" : 1e-3
+    "weight_decay" : 1e-2
 }
