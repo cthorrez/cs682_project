@@ -106,7 +106,7 @@ def main(batch_size = 100, weight_decay=1e-4, num_epochs=1, name='default', loss
                 print('loss net loss:', float(loss_net_loss))
                 loss_net_loss.backward(retain_graph=True)
                 loss_optimizer.step()
-                loss = cross_ent_loss - torch.sum(pred_iou)
+                loss = cross_ent_loss - torch.mean(pred_iou)
 
             loss.backward()
             optimizer.step()
