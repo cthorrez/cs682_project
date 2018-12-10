@@ -8,6 +8,14 @@ def accuracy(scores, labels):
     total = float(len(preds))
     return correct/total
 
+def precision_at_k(scores, labels, k=5):
+    _, indices = torch.topk(scores, dim=1, k=k)
+    labels = labels.unsqueeze(1)
+    correct = float(torch.sum(indices==labels))
+    total = float(len(scores))
+    return correct/total
+
+
 
 # takes list of upper lefts and bottom rights, each is Bx2, B is batch size
 # returns Bx1 tensor of areas
@@ -71,3 +79,20 @@ class TwoHeadedNet(nn.Module):
         bb = self.fc_bb(x)
         bb = self.sigmoid(bb)*64
         return scores, bb
+
+
+class LossNet(nn.Module):
+    def __init__(self):
+        super(LossNet, self).__init__()
+        self.relu = nn.ReLU()
+        self.sigmoid = nn.Sigmoid()
+        self.fc1 = nn.Linear(8, 64)
+        self.fc2 = nn.Linear(64,1)
+
+    def forward(self,bbs, bb_preds):
+        x = torch.cat([bbs, bb_preds])
+        x = self.fc1(x)
+        x = self.relu(x)
+        x = self.fc2(x)
+        x = self.sigmoid(x)
+        return x

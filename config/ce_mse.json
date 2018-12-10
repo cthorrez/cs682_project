@@ -1,0 +1,6 @@
+{
+    "name" : "ce_mse",
+    "num_epochs" : 10,
+    "batch_size" : 250,
+    "weight_decay" : 1e-3
+}

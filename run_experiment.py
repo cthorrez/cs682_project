@@ -1,18 +1,24 @@
 import sys
+import shutil
+import os
 import os.path as osp
+import json
 import numpy as np
 import torch
 import torch.nn as nn
 import torch.optim as optim
 from torch.utils.data import Dataset, DataLoader
 from utils import TrainDataset,ValTestDataset, validate
-from models import TwoHeadedNet, IoU, accuracy
+from models import TwoHeadedNet, LossNet, IoU, accuracy, precision_at_k
 
 
+def main(batch_size = 100, weight_decay=1e-4, num_epochs=1, name='default'):
+    if os.path.exists('log/'+name):
+        shutil.rmtree('log/'+name)
+    os.makedirs(osp.join('log',name,'models'))
 
-
-
-def main():
+    print('batch_size:', batch_size)
+    print('num_epochs:', num_epochs)
 
     if torch.cuda.is_available():
         device = torch.cuda.current_device()
@@ -20,28 +26,36 @@ def main():
         device = 'cpu'
 
 
+    batches_per_epoch = 50000//batch_size
+
+
     torch.manual_seed(2)
 
     model = TwoHeadedNet()
     model = model.to(device)
 
+    loss_net = LossNet()
+    loss_net = loss_net.to(device)
+
     #optimizer = optim.RMSprop(model.parameters())
-    optimizer = optim.Adam(model.parameters(), weight_decay=1e-3)
+    optimizer = optim.Adam(model.parameters(), weight_decay=weight_decay)
+    loss_optimizer = optim.Adam(loss_net.parameters(), weight_decay=weight_decay)
     cross_ent_loss_fn = nn.CrossEntropyLoss()
     mse_loss_fn = nn.MSELoss()
     iou_fn = IoU()
 
     val = ValTestDataset(mode='val')
-    val_loader = DataLoader(val, batch_size=10, shuffle=False)
+    val_loader = DataLoader(val, batch_size=batch_size, shuffle=False)
 
     train = TrainDataset()
-    train_loader = DataLoader(train, batch_size=25, shuffle=True)
+    train_loader = DataLoader(train, batch_size=batch_size, shuffle=True)
 
 
-    num_epochs = 3
-    results = []
+    val_results = []
+    train_results = []
 
     for epoch in range(num_epochs):
+        epoch_results = []
 
         for i,batch in enumerate(train_loader):
             images, labels, bbs = batch
@@ -57,27 +71,58 @@ def main():
             mse_loss = mse_loss_fn(bb_preds, bbs)
             iou = iou_fn(bb_preds, bbs)
             acc = accuracy(scores, labels)
+            pk = precision_at_k(scores, labels)
 
-            print('cross ent loss:', float(cross_ent_loss))
-            print('mse loss:', float(mse_loss))
-            print('iou:', float(iou))
-            print('accuracy:', float(acc))
 
-            loss = cross_ent_loss - iou
+            train_results.append([acc, pk, float(iou), float(mse_loss), float(cross_ent_loss)])
+
+            # print('cross ent loss:', float(cross_ent_loss))
+            # print('mse loss:', float(mse_loss))
+            # print('iou:', float(iou))
+            # print('accuracy:', acc)
+            # print('precision at 5:', pk)
+
+
+            # loss = cross_ent_loss
+            # loss = -iou
+            # loss = mse_loss
+            # loss = cross_ent_loss - iou
+            loss = cross_ent_loss + mse_loss/200
+
             loss.backward()
             optimizer.step()
 
-        acc, iou, mse, ce = validate(val_loader, model)
-        results.append([epoch, acc, iou, mse, ce])
+            # pred_iou = loss_net(bbs, bb_preds)
+            # loss_net_loss = mse_loss_fn(iou, pred_iou)
+            # print('loss net loss:', float(loss_net_loss))
+            # loss_net_loss.backward()
+            # loss_optimizer.step()
 
 
-    name = 'blank'
 
-    results = np.array(results)
-    np.savetxt(osp.join('log',name+'.csv'),results, delimiter=',')
-    torch.save(model, osp.join('models',name))
+        epoch_results = train_results[epoch*batches_per_epoch:(epoch+1)*batches_per_epoch]
+        epoch_results = np.mean(epoch_results, dim=0)
+        acc, pk, iou, mse, ce = epoch_results
+        print('train:', 'acc:', acc, 'p5:', pk, 'iou:', iou, 'mse:', mse, 'ce:', ce)
 
+
+
+        acc, iou, mse, ce, pk = validate(val_loader, model)
+        print('val:', 'acc:', acc, 'p5:', pk, 'iou:', iou, 'mse:', mse, 'ce:', ce)
+        val_results.append([acc, pk, iou, mse, ce])
+
+        torch.save(model.cpu(), osp.join('log', name, 'models','model_'+str(epoch)))
+
+
+    train_results = np.array(train_results)
+    val_loader = np.array(val_results)
+
+    np.savetxt(osp.join('log',name+_train+'.csv'),train_results, delimiter=',')
+    np.savetxt(osp.join('log',name+_val+'.csv'),val_results, delimiter=',')
 
 
 if __name__ == '__main__':
-    main()
+    cfg_fname = sys.argv[1]
+    with open(cfg_fname) as cfg_file:
+        args = json.load(cfg_file)
+    main(**args)

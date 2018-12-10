@@ -1,0 +1,6 @@
+{
+    "name" : "default",
+    "num_epochs" : 1,
+    "batch_size" : 25,
+    "weight_decay" : 1e-4
+}

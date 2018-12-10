@@ -6,10 +6,32 @@ import os.path as osp
 from itertools import chain
 from torch.utils.data import Dataset, DataLoader
 import torchvision.transforms.functional as tf
-from models import IoU, accuracy
-
+from models import IoU, accuracy, precision_at_k
 import cv2
+import matplotlib
+import matplotlib.pyplot as plt
 
+
+def show_img_bbs(img, pred, actual):
+
+    img = tf.to_pil_image(img)
+
+    fig,ax = plt.subplots(1)
+    ax.imshow(img)
+
+    ll = pred[:2]
+    w = pred[2]- ll[0]
+    h = pred[3] - ll[1]
+    rect = matplotlib.patches.Rectangle(ll,w,h,linewidth=3,edgecolor='r',facecolor='none')
+    ax.add_patch(rect)
+
+    ll = actual[:2]
+    w = actual[2] - ll[0]
+    h = actual[3] - ll[1]
+    rect = matplotlib.patches.Rectangle(ll,w,h,linewidth=3,edgecolor='b',facecolor='none')
+    ax.add_patch(rect)
+
+    plt.show()
 
 
 
@@ -18,7 +40,7 @@ def validate(data_loader, model):
         device = torch.cuda.current_device()
     else:
         device = 'cpu'
-    mse, ce, iou, acc = [], [], [], []
+    mse, ce, iou, acc, pk = [], [], [], [], []
     iou_fn = IoU()
 
     for batch in data_loader:
@@ -31,27 +53,29 @@ def validate(data_loader, model):
         tmp_iou= float(iou_fn(bbs, bb_preds))
         tmp_mse = float(F.mse_loss(bbs,bb_preds))
         tmp_ce = float(F.cross_entropy(scores,labels))
+        tmp_pk = float(precision_at_k(scores, labels))
 
         mse.append(tmp_mse)
         acc.append(tmp_acc)
         ce.append(tmp_ce)
         iou.append(tmp_iou)
+        pk.append(tmp_pk)
 
-        print('val:', 'acc:', tmp_acc, 'iou:', tmp_iou, 'mse:', tmp_mse, 'ce:', tmp_ce)
-    
-
+        #print('val:', 'acc:', tmp_acc, 'iou:', tmp_iou, 'mse:', tmp_mse, 'ce:', tmp_ce)
     mse = np.mean(mse)
     ce = np.mean(ce)
     iou = np.mean(iou)
     acc = np.mean(acc)
+    pk = np.mean(pk)
 
-    return acc, iou, mse, ce 
+    return acc, iou, mse, ce ,pk
 
 class TrainDataset(Dataset):
-    def __init__(self, seed=0):
+    def __init__(self, seed=0, normalize=True):
         self.data_dir = 'data/train'
         self.categories = sorted(os.listdir(self.data_dir))
         self.cat2idx = {self.categories[i]:i for i in range(len(self.categories))}
+        self.normalize = normalize
         
         self.fname2bbox = {}
         for cat in self.categories:
@@ -71,8 +95,10 @@ class TrainDataset(Dataset):
 
         image = cv2.imread(fname, cv2.IMREAD_COLOR)
         image = tf.to_tensor(image)
-        image = tf.normalize(image, mean=[0.485, 0.456, 0.406],
-                                     std=[0.229, 0.224, 0.225])
+
+        if self.normalize:
+            image = tf.normalize(image, mean=[0.485, 0.456, 0.406],
+                                         std=[0.229, 0.224, 0.225])
 
         label = self.cat2idx[category]
         bbox = self.fname2bbox[fname]
@@ -81,7 +107,7 @@ class TrainDataset(Dataset):
         return image, label, bbox
 
 class ValTestDataset(Dataset):
-    def __init__(self, mode, seed=0):
+    def __init__(self, mode, seed=0, normalize=True):
         if mode == 'val':
             low, high = 0,5000
         elif mode == 'test':
@@ -89,6 +115,8 @@ class ValTestDataset(Dataset):
         else:
             print('mode must be val or test')
             exit(1)
+
+        self.normalize = normalize
 
         matrix = np.genfromtxt('data/val/val_annotations.txt', delimiter='\t', dtype=str)
         self.strings = matrix[:,:2]
@@ -109,7 +137,8 @@ class ValTestDataset(Dataset):
 
         image = cv2.imread(fname, cv2.IMREAD_COLOR)
         image = tf.to_tensor(image)
-        image = tf.normalize(image, mean=[0.485, 0.456, 0.406],
-                                     std=[0.229, 0.224, 0.225])
+        if self.normalize:
+            image = tf.normalize(image, mean=[0.485, 0.456, 0.406],
+                                         std=[0.229, 0.224, 0.225])
         bbox = torch.FloatTensor(self.bbs[idx,:])
         return image, label, bbox
