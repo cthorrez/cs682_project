@@ -42,6 +42,7 @@ def validate(data_loader, model):
         device = 'cpu'
     mse, ce, iou, acc, pk = [], [], [], [], []
     iou_fn = IoU()
+    mse_loss_fn = nn.MSELoss()
 
     for batch in data_loader:
         imgs, labels, bbs = batch
@@ -51,7 +52,7 @@ def validate(data_loader, model):
     
         tmp_acc = float(accuracy(scores,labels))
         tmp_iou= float(iou_fn(bbs, bb_preds))
-        tmp_mse = float(F.mse_loss(bbs,bb_preds))
+        tmp_mse = float(mse_loss_fn(bbs,bb_preds))
         tmp_ce = float(F.cross_entropy(scores,labels))
         tmp_pk = float(precision_at_k(scores, labels))
 
