@@ -102,7 +102,7 @@ def main(batch_size = 100, weight_decay=1e-4, num_epochs=1, name='default', loss
                 pred_iou = loss_net(bbs, bb_preds)
                 print('iou:', iou)
                 print('pred_iou:', pred_iou)
-                loss_net_loss = mse_loss_fn(iou, pred_iou)
+                loss_net_loss = mse_loss_fn(iou, torch.squeeze(pred_iou))
                 print('loss net loss:', float(loss_net_loss))
                 loss_net_loss.backward(retain_graph=True)
                 loss_optimizer.step()
