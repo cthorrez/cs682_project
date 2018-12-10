@@ -66,6 +66,8 @@ def main(batch_size = 100, weight_decay=1e-4, num_epochs=1, name='default', loss
             images, labels, bbs = images.to(device), labels.to(device), bbs.to(device)
             
             optimizer.zero_grad()
+            loss_optimizer.zero_grad()
+            
             scores, bb_preds = model(images)
 
             print(torch.mean(bb_preds, dim=0).data)
